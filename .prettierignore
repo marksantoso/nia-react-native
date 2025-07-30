@@ -1,0 +1,30 @@
+ # Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+
+# Build outputs
+build/
+ios/
+android/
+
+# Generated files
+*.d.ts
+coverage/
+
+# Config files that should maintain their format
+package-lock.json
+yarn.lock
+
+# Assets
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+
+# Logs
+*.log
