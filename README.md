@@ -106,3 +106,8 @@ This structure helps keep the project organized and maintainable as it grows.
 - Location-based environmental tracking
 - Sortable and filterable weather cards
 - Responsive design for multiple screen sizes
+
+## Future Improvements
+
+- Implement comprehensive E2E testing using Detox
+- Create reusable form components with validation
