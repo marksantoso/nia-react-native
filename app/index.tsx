@@ -1,9 +1,9 @@
-import { ThemedView } from '@/components/ThemedView';
-import { Spinner } from '@/components/ui/Spinner';
-import { useAuthStore } from '@/stores/useAuthStore';
-import { router } from 'expo-router';
-import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+import { ThemedView } from "@/components/ThemedView";
+import { Spinner } from "@/components/ui/Spinner";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { router } from "expo-router";
+import { useEffect } from "react";
+import { StyleSheet } from "react-native";
 
 export default function SplashScreen() {
   const { init, isAuthenticated, loading } = useAuthStore();
@@ -13,7 +13,7 @@ export default function SplashScreen() {
       try {
         await init();
       } catch (error) {
-        console.error('Auth check failed:', error);
+        console.error("Auth check failed:", error);
       }
     }
     initializeApp();
@@ -21,12 +21,12 @@ export default function SplashScreen() {
 
   useEffect(() => {
     async function handleNavigation() {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       if (!loading) {
         if (isAuthenticated) {
-          router.replace('/(tabs)/home');
+          router.replace("/(tabs)/home");
         } else {
-          router.replace('/(auth)/login');
+          router.replace("/(auth)/login");
         }
       }
     }
@@ -43,7 +43,7 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

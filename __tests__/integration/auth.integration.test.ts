@@ -1,51 +1,56 @@
-import { useAuthStore } from '@/stores/useAuthStore';
-import type { User } from 'firebase/auth';
+import { useAuthStore } from "@/stores/useAuthStore";
+import type { User } from "firebase/auth";
 import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-} from 'firebase/auth';
-import { auth } from '../../firebase';
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
+import { auth } from "../../firebase";
 
 // --- Mock Firebase Auth ---
-jest.mock('firebase/auth', () => ({
+jest.mock("firebase/auth", () => ({
   createUserWithEmailAndPassword: jest.fn(),
   signInWithEmailAndPassword: jest.fn(),
   signOut: jest.fn(),
   onAuthStateChanged: jest.fn(),
 }));
 
-const mockCreateUser = createUserWithEmailAndPassword as jest.MockedFunction<typeof createUserWithEmailAndPassword>;
-const mockSignIn = signInWithEmailAndPassword as jest.MockedFunction<typeof signInWithEmailAndPassword>;
+const mockCreateUser = createUserWithEmailAndPassword as jest.MockedFunction<
+  typeof createUserWithEmailAndPassword
+>;
+const mockSignIn = signInWithEmailAndPassword as jest.MockedFunction<
+  typeof signInWithEmailAndPassword
+>;
 const mockSignOut = signOut as jest.MockedFunction<typeof signOut>;
 
 // --- Mock Firebase Config ---
-jest.mock('../../firebase', () => ({
+jest.mock("../../firebase", () => ({
   auth: { currentUser: null },
 }));
 
 // --- Helper to create a mock user ---
-const createMockUser = (overrides: Partial<User> = {}): User => ({
-  uid: '123',
-  email: 'test@example.com',
-  emailVerified: true,
-  displayName: null,
-  photoURL: null,
-  getIdToken: jest.fn().mockResolvedValue('mock-token'),
-  ...overrides,
-} as unknown as User);
+const createMockUser = (overrides: Partial<User> = {}): User =>
+  ({
+    uid: "123",
+    email: "test@example.com",
+    emailVerified: true,
+    displayName: null,
+    photoURL: null,
+    getIdToken: jest.fn().mockResolvedValue("mock-token"),
+    ...overrides,
+  }) as unknown as User;
 
 // --- Helper to create a mock UserCredential ---
 const createMockUserCredential = (user: User) => ({
   user,
-  providerId: 'password',
-  operationType: 'signIn' as const,
+  providerId: "password",
+  operationType: "signIn" as const,
 });
 
-describe('Auth Integration', () => {
-  const testEmail = 'integration-test@example.com';
-  const testPassword = 'TestPassword123!';
-  
+describe("Auth Integration", () => {
+  const testEmail = "integration-test@example.com";
+  const testPassword = "TestPassword123!";
+
   beforeEach(() => {
     jest.clearAllMocks();
     useAuthStore.setState({
@@ -56,7 +61,7 @@ describe('Auth Integration', () => {
     });
   });
 
-  it('should complete full authentication lifecycle', async () => {
+  it("should complete full authentication lifecycle", async () => {
     const store = useAuthStore.getState();
     const mockUser = createMockUser({ email: testEmail });
 
@@ -76,7 +81,7 @@ describe('Auth Integration', () => {
     // Step 2: Sign Out
     mockSignOut.mockResolvedValue(undefined);
     await store.signOut();
-    
+
     // Verify signout success
     expect(mockSignOut).toHaveBeenCalledWith(auth);
     expect(useAuthStore.getState().user).toBeNull();
@@ -94,34 +99,33 @@ describe('Auth Integration', () => {
     expect(user.getIdToken).toHaveBeenCalled();
   });
 
-  it('should handle invalid credentials during sign in', async () => {
+  it("should handle invalid credentials during sign in", async () => {
     const store = useAuthStore.getState();
-    mockSignIn.mockRejectedValue({ code: 'auth/wrong-password' });
+    mockSignIn.mockRejectedValue({ code: "auth/wrong-password" });
 
-    await expect(store.signIn(testEmail, 'wrongpassword'))
-      .rejects
-      .toEqual({
-        code: 'auth/wrong-password',
-        message: 'Invalid email or password',
-      });
+    await expect(store.signIn(testEmail, "wrongpassword")).rejects.toEqual({
+      code: "auth/wrong-password",
+      message: "Invalid email or password",
+    });
 
     expect(useAuthStore.getState().error).toEqual({
-      code: 'auth/wrong-password',
-      message: 'Invalid email or password',
+      code: "auth/wrong-password",
+      message: "Invalid email or password",
     });
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
     expect(useAuthStore.getState().user).toBeNull();
   });
 
-  it('should handle network errors during sign in', async () => {
+  it("should handle network errors during sign in", async () => {
     const store = useAuthStore.getState();
-    mockSignIn.mockRejectedValue(new Error('Network Error'));
+    mockSignIn.mockRejectedValue(new Error("Network Error"));
 
-    await expect(store.signIn(testEmail, testPassword))
-      .rejects
-      .toThrow('Network Error');
+    await expect(store.signIn(testEmail, testPassword)).rejects.toEqual({
+      code: "auth/network-error",
+      message: "Network error. Please check your internet connection",
+    });
 
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
     expect(useAuthStore.getState().user).toBeNull();
   });
-}); 
+});

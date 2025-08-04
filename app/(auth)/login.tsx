@@ -44,8 +44,9 @@ export default function LoginScreen() {
       if (user) {
         router.replace("/(tabs)/home");
       }
-    } catch (err) {
+    } catch (err: any) {
       // Error is handled by the store
+      console.error(err);
     }
   };
 
@@ -148,7 +149,7 @@ export default function LoginScreen() {
                 disabled={loading}
               >
                 <ThemedText style={styles.linkText}>
-                  Don't have an account? Register
+                  Don&apos;t have an account? Register
                 </ThemedText>
               </TouchableOpacity>
             </ThemedView>

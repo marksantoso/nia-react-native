@@ -2,11 +2,11 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  signInWithEmailAndPassword
-} from 'firebase/auth';
-import { create } from 'zustand';
-import { auth } from '../firebase';
- 
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { create } from "zustand";
+import { auth } from "../firebase";
+
 interface RegisterData {
   email: string;
   password: string;
@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({
         user,
         isAuthenticated: !!user,
-        loading: false
+        loading: false,
       });
     });
   },
@@ -52,34 +52,44 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({ loading: true, error: null });
 
       if (!data.email || !data.password) {
-        throw { code: 'validation/missing-fields', message: 'All fields are required' };
+        throw {
+          code: "validation/missing-fields",
+          message: "All fields are required",
+        };
       }
 
       if (data.password.length < 8) {
-        throw { code: 'validation/weak-password', message: 'Password must be at least 8 characters long' };
+        throw {
+          code: "validation/weak-password",
+          message: "Password must be at least 8 characters long",
+        };
       }
 
-      const result = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      set({ user: result.user, loading: false });
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password,
+      );
+      set({ user: result.user, loading: false, isAuthenticated: true });
       return result.user;
     } catch (err: any) {
       let error = {
         code: err.code,
-        message: 'An error occurred during registration'
+        message: "An error occurred during registration",
       };
 
       switch (err.code) {
-        case 'auth/email-already-in-use':
-          error.message = 'Email address is already in use';
+        case "auth/email-already-in-use":
+          error.message = "Email address is already in use";
           break;
-        case 'auth/invalid-email':
-          error.message = 'Invalid email address';
+        case "auth/invalid-email":
+          error.message = "Invalid email address";
           break;
-        case 'auth/weak-password':
-          error.message = 'Password is too weak';
+        case "auth/weak-password":
+          error.message = "Password is too weak";
           break;
-        case 'validation/missing-fields':
-          error.message = 'All fields are required';
+        case "validation/missing-fields":
+          error.message = "All fields are required";
           break;
       }
 
@@ -95,8 +105,42 @@ export const useAuthStore = create<AuthStore>((set) => ({
       await user.getIdToken();
       set({ user, isAuthenticated: true, loading: false });
       return user;
-    } catch (error) {
-      set({ error: { code: 'auth/wrong-password', message: 'Invalid email or password' }, loading: false });
+    } catch (err: any) {
+      let errorObj = {
+        code: err.code || "auth/unknown",
+        message: "An unexpected error occurred",
+      };
+
+      switch (err.code) {
+        case "auth/invalid-email":
+          errorObj.message = "Invalid email address format";
+          break;
+        case "auth/user-disabled":
+          errorObj.message = "This account has been disabled";
+          break;
+        case "auth/user-not-found":
+        case "auth/wrong-password":
+          errorObj.message = "Invalid email or password";
+          break;
+        case "auth/too-many-requests":
+          errorObj.message =
+            "Too many failed login attempts. Please try again later";
+          break;
+        default:
+          if (err.message === "Network Error") {
+            errorObj = {
+              code: "auth/network-error",
+              message: "Network error. Please check your internet connection",
+            };
+          }
+          break;
+      }
+
+      set({
+        error: errorObj,
+        loading: false,
+      });
+      throw errorObj;
     }
   },
 
@@ -112,7 +156,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({
         user: currentUser,
         isAuthenticated: !!currentUser,
-        loading: false
+        loading: false,
       });
 
       return !!currentUser;

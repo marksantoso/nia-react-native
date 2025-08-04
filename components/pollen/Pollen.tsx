@@ -1,10 +1,7 @@
-import { ThemedText } from '@/components/ThemedText';
-import { SPACING } from '@/constants/Dimensions';
-import { StyleSheet } from 'react-native';
-import { HealthRecommendations } from './HealthRecommendations';
-import { PollenCard } from './PollenCard';
-import { Pollutant, Pollutants } from './Pollutants';
-
+import { ThemedText } from "@/components/ThemedText";
+import { HealthRecommendations } from "./HealthRecommendations";
+import { PollenCard } from "./PollenCard";
+import { Pollutant, Pollutants } from "./Pollutants";
 
 type HealthRecommendationType = {
   all: string;
@@ -30,7 +27,6 @@ type PollenType = {
   risk: string;
 };
 
-
 type PollenData = {
   index: PollenIndex;
   types: PollenType;
@@ -44,7 +40,8 @@ export function Pollen({ pollen }: { pollen: string | null }) {
   let pollenData: PollenData;
   try {
     pollenData = JSON.parse(pollen);
-  } catch (e) {
+  } catch (e: any) {
+    console.error(e);
     return <ThemedText>Invalid pollen data</ThemedText>;
   }
 
@@ -52,62 +49,9 @@ export function Pollen({ pollen }: { pollen: string | null }) {
     <>
       <PollenCard pollen={pollenData.index} />
       <Pollutants pollutants={pollenData.pollutants} />
-      <HealthRecommendations recommendations={pollenData.health_recommendations} />
+      <HealthRecommendations
+        recommendations={pollenData.health_recommendations}
+      />
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  indexCard: {
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  indexIndicator: {
-    height: 4,
-    borderRadius: 2,
-    marginBottom: SPACING.sm,
-  },
-  indexTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  indexValue: {
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  indexQualification: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  indexDescription: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  typesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-    marginBottom: SPACING.md,
-  },
-  typeCard: {
-    width: '48%',
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
-  },
-  typeName: {
-    fontSize: 14,
-    marginBottom: SPACING.xs,
-  },
-  typeValue: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: SPACING.xs,
-  },
-  typeRisk: {
-    fontSize: 12,
-    opacity: 0.6,
-  },
-});
